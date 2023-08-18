@@ -1,8 +1,7 @@
-from datetime import timedelta
-
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
+from datetime import timedelta
 
 
 class User(AbstractUser):
@@ -21,7 +20,7 @@ class Category(models.Model):
 class Book(models.Model):
     title = models.CharField(max_length=200)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    stock = models.PositiveIntegerField(default=0)
+    stock = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     max_borrow_days = models.PositiveIntegerField(null=True, blank=True)
 
@@ -30,9 +29,12 @@ class Book(models.Model):
 
     def save(self, *args, **kwargs):
         n = self.stock
-        f_30 = Transaction.objects.filter(book=self, date__gte=timezone.now() - timedelta(days=30)).count()
-        result = (30 * n) / (n + f_30) + 1
-        self.max_borrow_days = max(result, 3)
+        if n == 0:
+            self.max_borrow_days = 3
+        else:
+            f_30 = Transaction.objects.filter(book=self, date__gte=timezone.now() - timedelta(days=30)).count()
+            result = (30 * n) / (n + f_30) + 1
+            self.max_borrow_days = max(result, 3)
 
         super().save(*args, **kwargs)
 
