@@ -49,6 +49,7 @@ class Customer(models.Model):
         return self.user.username
 
 
+
 class Transaction(models.Model):
     BOOK_BORROW = 'BB'
     BOOK_PURCHASE = 'BP'
@@ -60,5 +61,6 @@ class Transaction(models.Model):
     transaction_type = models.CharField(max_length=2, choices=TRANSACTION_TYPE_CHOICES)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateTimeField(auto_now_add=True)
     return_date = models.DateTimeField(null=True, blank=True)
+

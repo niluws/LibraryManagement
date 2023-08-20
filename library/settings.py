@@ -9,9 +9,10 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
-
+from datetime import timedelta
+from celery import Celery
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -38,7 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'celery',
+    'django_celery_beat',
     'rest_framework',
+
     'book',
 ]
 
@@ -125,3 +129,16 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+#celery setting
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BEAT_SCHEDULE = {
+    'deduct_daily_rent': {
+        'task': 'book.tasks.deduct_daily_rent',
+        'schedule': timedelta(days=1),
+    },
+}
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'book.settings')
+app = Celery('book')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()
