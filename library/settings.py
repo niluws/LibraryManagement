@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'celery',
     'django_celery_beat',
     'rest_framework',
+    'django_filters',
 
     'book',
 ]
@@ -142,3 +143,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'book.settings')
 app = Celery('book')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
+#REST_FRAMEWORK setting
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}
