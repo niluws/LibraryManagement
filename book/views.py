@@ -1,9 +1,11 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Book, Customer, Transaction
-from .serializers import TransactionSerializer
+from .serializers import TransactionSerializer,BookSerializer
 from .tasks import deduct_daily_rent
+from .permissions import IsManagerPermission
 
 
 class BookBorrowView(generics.CreateAPIView):
@@ -54,6 +56,14 @@ class ReturnBookView(generics.UpdateAPIView):
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        print(request.data.get('calculate_late_days'))
         self.perform_update(serializer)
         return Response(serializer.data)
+
+
+class BookListView(generics.ListAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [IsManagerPermission]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['title', 'category__genre', 'category__type', 'stock']
+
