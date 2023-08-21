@@ -23,3 +23,10 @@ class BookSerializer(serializers.ModelSerializer):
     def get_borrowers(self, obj):
         borrowers = obj.transaction_set.filter(transaction_type=Transaction.BOOK_BORROW).values_list('customer__user__username', flat=True)
         return list(borrowers)
+
+
+class PostBookSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Book
+        fields = ['title','stock','price','category']

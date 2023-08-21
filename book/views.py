@@ -3,7 +3,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Book, Customer, Transaction
-from .serializers import TransactionSerializer,BookSerializer
+from .serializers import TransactionSerializer,BookSerializer,PostBookSerializer
 from .tasks import deduct_daily_rent
 from .permissions import IsManagerPermission
 
@@ -66,4 +66,10 @@ class BookListView(generics.ListAPIView):
     permission_classes = [IsManagerPermission]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['title', 'category__genre', 'category__type', 'stock']
+
+
+class PostBookView(generics.CreateAPIView):
+    queryset = Book.objects.all()
+    serializer_class = PostBookSerializer
+
 
