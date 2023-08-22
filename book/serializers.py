@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Transaction, Book
+from .models import Transaction, Book,Category
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -35,3 +35,14 @@ class PostBookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
         fields = ['title','stock','price','category']
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ('id', 'genre', 'type')
+
+
+class IncomeReportSerializer(serializers.Serializer):
+    category = CategorySerializer()
+    total_income = serializers.DecimalField(max_digits=10, decimal_places=2)
