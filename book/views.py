@@ -27,6 +27,7 @@ class BookBorrowView(generics.CreateAPIView):
             customer_id=customer_id
 
         ).count()
+
         if existing_transaction:
             return Response({'error': 'You already have borrowed a book.Return the book first and try again.'},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -38,6 +39,13 @@ class BookBorrowView(generics.CreateAPIView):
         elif borrowed_from_category > customer.max_borrow_limit:
             return Response({'error': 'More than your limit.You can borrow from other category.'},
                             status=status.HTTP_400_BAD_REQUEST)
+
+        if serializer.validated_data['transaction_type']=='BB':
+
+            stock = book.stock
+            stock -= 1
+            book.stock = stock
+            book.save()
 
         deduct_daily_rent()
 
@@ -55,6 +63,15 @@ class ReturnBookView(generics.UpdateAPIView):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        book_id = request.data.get('book')
+        book = Book.objects.get(id=book_id)
+
+        if serializer.validated_data['return_date']!= None:
+            stock = book.stock
+            stock += 1
+            book.stock = stock
+            book.save()
 
         self.perform_update(serializer)
         return Response(serializer.data)
