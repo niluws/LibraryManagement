@@ -79,32 +79,31 @@ class BookListView(generics.ListAPIView):
     serializer_class = BookSerializer
     permission_classes = [IsManagerPermission]
 
-
 class IncomeReportView(generics.ListAPIView):
     serializer_class = IncomeReportSerializer
 
     def get_queryset(self):
-        categories = Category.objects.all()
+        categories = Category.objects.prefetch_related('book_set').all()
         income_reports = []
 
         for category in categories:
-            book_borrow_transactions = Transaction.objects.filter(
-                book__category=category,
-                transaction_type=Transaction.BOOK_BORROW
-            )
-
             book_borrow_income = 0
-            for transaction in book_borrow_transactions:
-                borrow_date = transaction.date
-                return_date = transaction.return_date
-                if return_date:
-                    days_borrowed = (return_date - borrow_date).days + 1
-                    income = days_borrowed * category.daily_price
-                    book_borrow_income += income
-
             book_purchase_income = 0
-            books_in_category = Book.objects.filter(category=category)
-            for book in books_in_category:
+
+            for book in category.book_set.all():
+                book_borrow_transactions = Transaction.objects.filter(
+                    book=book,
+                    transaction_type=Transaction.BOOK_BORROW
+                )
+
+                for transaction in book_borrow_transactions:
+                    borrow_date = transaction.date
+                    return_date = transaction.return_date
+                    if return_date:
+                        days_borrowed = (return_date - borrow_date).days + 1
+                        income = days_borrowed * category.daily_price
+                        book_borrow_income += income
+
                 book_purchase_transactions = Transaction.objects.filter(
                     book=book,
                     transaction_type=Transaction.BOOK_PURCHASE
