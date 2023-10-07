@@ -23,7 +23,7 @@ This is an online library management system built using Django Rest Framework (D
    cd LibraryManagement
    ```
 
-2. Create a virtual environment and install the dependencies:
+2. Create a virtual environment and:
 
    ```bash
    python -m venv venv
